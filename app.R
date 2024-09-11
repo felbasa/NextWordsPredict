@@ -25,8 +25,8 @@ ui <- fluidPage(
       plotOutput("histogramPlotQ3"), 
       plotOutput("histogramPlotQ4"), 
       plotOutput("histogramPlotQ5"), 
-      plotOutput("histogramPlotQ6"), 
-      uiOutput("myTable")
+      plotOutput("histogramPlotQ6") 
+      # , uiOutput("myTable")
     )
   )
 )
@@ -40,11 +40,6 @@ server <- function(input, output, session) {
     read_sheet(sheet_url) %>%
       # select every column except for timestamp and user's email address
       select(!c(Timestamp, `Email Address`))
-  })
-  
-  # Data table output
-  output$myTable <- renderTable({
-    df()
   })
   
   # Reactive expression to generate barplot for Question 1
@@ -76,6 +71,11 @@ server <- function(input, output, session) {
   output$histogramPlotQ6 <- renderPlot({
     create_ggplot_bar(df(), "`Anthony was excited about the upcoming ______ because he loved spending time with his friends.`", "Anthony was excited about the upcoming ______ because he loved spending time with his friends.", color_fill = "#A3B5A2")
   })
+  
+  # Data table output
+  # output$myTable <- renderTable({
+  #   df()
+  # })
 }
 
 # Run the application 
