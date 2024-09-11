@@ -6,46 +6,32 @@
 #
 #    https://shiny.posit.co/
 #
-
 library(shiny)
+library(googlesheets4)
+library(dplyr)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
+ui <- ui <- fluidPage(
+  tableOutput("myTable")
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
+# Define server logic required
+server <- function(input, output, session) {
+  
+  # Function to get data from Google Sheets
+  get_data <- reactive({
+    sheet_url <- "https://docs.google.com/spreadsheets/d/1B9k5_BNwvTcy4sjWlUMVpVMdvA4RTLefTCbcJN66eFM/edit?resourcekey=&gid=967575587#gid=967575587"
+    read_sheet(sheet_url) %>%
+      # select every column except for timestamp and user's email address
+      select(!c(Timestamp, `Email Address`))
+  })
+  
+  # Example output
+  output$myTable <- renderTable({
+    get_data()
+  })
 }
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
