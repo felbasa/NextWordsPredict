@@ -1,0 +1,71 @@
+How to Authenticate a Shiny App to Google Sheets
+
+1. Set Up Google Sheets API Access
+
+Create a Project in Google Cloud Console
+
+Go to the Google Cloud Console.
+Create a new project or select an existing one.
+Enable Google Sheets API
+
+Navigate to APIs & Services > Library.
+Search for Google Sheets API and enable it for your project.
+Create a Service Account
+
+Go to APIs & Services > Credentials.
+Click Create credentials and select Service account.
+Fill in the necessary details and create the service account.
+Download the JSON key file for the service account.
+Share Google Sheet with Service Account
+
+Open the Google Sheet you want to access.
+Click the Share button.
+Share the document with the email address of your service account (e.g., your-service-account@your-project-id.iam.gserviceaccount.com).
+2. Set Up Authentication in R
+
+Install and Load Required Packages
+
+r
+Copy code
+install.packages("googlesheets4")
+library(googlesheets4)
+Authenticate with the Service Account Key
+
+Use the gs4_auth function to authenticate using the path to your service account key JSON file.
+r
+Copy code
+gs4_auth(path = "/path/to/your-service-account-key.json")
+3. Access and Read Google Sheet
+
+Specify the Google Sheet URL
+
+Use the read_sheet function to access the Google Sheet by its URL.
+r
+Copy code
+sheet_url <- "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?resourcekey=&gid=YOUR_GID"
+Read the Sheet Data
+
+r
+Copy code
+sheet_data <- read_sheet(sheet_url)
+4. Troubleshooting Permission Issues
+
+Check Service Account Permissions
+
+Ensure the service account has been granted access to the Google Sheet.
+Verify OAuth Scopes
+
+Make sure the necessary scopes are enabled in the Google Cloud Console:
+https://www.googleapis.com/auth/spreadsheets.readonly for read-only access.
+https://www.googleapis.com/auth/spreadsheets for read and write access.
+Enable Google Sheets API
+
+Confirm the API is enabled for your project in the Google Cloud Console.
+5. Deploy the Shiny App
+
+Deploy to shinyapps.io
+
+Ensure that the service account key JSON file is included in your deployment package or securely managed using GitHub secrets.
+Test Authentication
+
+Verify that the Shiny app can access and read data from Google Sheets as expected.
