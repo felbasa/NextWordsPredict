@@ -10,6 +10,7 @@ library(shiny)
 library(googlesheets4)
 library(dplyr)
 library(DT)
+library(ggplot2)
 source("utils.R")
 
 # Define UI for application that renders graphs for each question asked in the survey
@@ -36,6 +37,8 @@ server <- function(input, output, session) {
   
   # Function to get data from Google Sheets and perform data manipulation
   df <- reactive({
+    # Authenticate using the downloaded JSON file
+    gs4_auth(path = "nextwordspredict-1f60d4671052.json")
     sheet_url <- "https://docs.google.com/spreadsheets/d/1B9k5_BNwvTcy4sjWlUMVpVMdvA4RTLefTCbcJN66eFM/edit?resourcekey=&gid=967575587#gid=967575587"
     read_sheet(sheet_url) %>%
       # select every column except for timestamp and user's email address
