@@ -4,8 +4,8 @@ username: felbasa12
 account: felbasa12
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 12684595
-bundleId: 9090491
+appId: 12687603
+bundleId: 9091350
 url: https://felbasa12.shinyapps.io/NextWordsPredict/
 version: 1
 asMultiple: FALSE
