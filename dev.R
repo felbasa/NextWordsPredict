@@ -73,3 +73,7 @@ preprocess <- function(x){
 
 count_word_frequencies(preprocess(openai_dat$resp1))
 lapply(openai_dat, preprocess)
+
+
+#########
+
