@@ -1,11 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
 library(shiny)
 library(googlesheets4)
 library(dplyr)
@@ -13,137 +5,261 @@ library(DT)
 library(ggplot2)
 library(readr)
 library(stringr)
+library(readxl)
 source("utils.R")
 
+# Define the responses CSV file to save the data
+responses_dat <- "responses.csv"
 # read open ai data
 openai_dat <- read_csv("openai_dat.csv")
-# resp1_freq <- tibble(count_word_frequencies(openai_dat$resp1))
+
+# get frequencies for openAI's Q1
 resp1_freq <- count_word_frequencies(preprocess(openai_dat$resp1))
 
-# Define UI for application that renders graphs for each question asked in the survey
-ui <- fluidPage(
-  titlePanel("Histograms for Each Question"),
-  sidebarLayout(
-    sidebarPanel(
-      # Input: Text input for question 1
-      textInput("user_input_Q1", "Julia went swimming at the ______", ""),
-      # Action button to submit the input
-      actionButton("submit_Q1", "Submit")
-      
-      # Input: Text input for question 2
-      # textInput("user_input_Q2", "", ""),
-      # # Action button to submit the input
-      # actionButton("submit_Q2", "Submit")
-    ),
-    mainPanel(
-      fluidRow(
-        column(6, plotOutput("plot_Q1")),  # First plot
-        column(6, plotOutput("plot_Q1_openai"))   # Second plot
-      ),
-      # plotOutput("plot_Q2")
-      # plotOutput("histogramPlotQ1"), 
-      # plotOutput("histogramPlotQ2"), 
-      # plotOutput("histogramPlotQ3"), 
-      # plotOutput("histogramPlotQ4"), 
-      # plotOutput("histogramPlotQ5"), 
-      # plotOutput("histogramPlotQ6") 
-      uiOutput("myTable")
-    )
-  )
-)
+# get frequencies for openAI's Q2
+resp2_freq <- count_word_frequencies(preprocess(openai_dat$resp2))
 
-# Define server logic required
-server <- function(input, output, session) {
-  ########## building reactive dataset and graph
-  # Initialize reactive datasets 
-    datasetQ1 <- reactiveVal(data.frame(UserInput = character(0), stringsAsFactors = FALSE))
-    datasetQ2 <- reactiveVal(data.frame(UserInput = character(0), stringsAsFactors = FALSE))
-    datasetQ3 <- reactiveVal(data.frame(UserInput = character(0), stringsAsFactors = FALSE))
-    
-    # Observe button click and add the user input to the dataset
-    observeEvent(input$submit_Q1, {
-        # Use the helper function to update the dataset for input 1
-        new_data <- append_input_to_dataset(input, "user_input_Q1", datasetQ1)
-        # Update the reactive dataset
-        datasetQ1(new_data)
-    })
-    
-    # Data table output
-    # output$myTable <- renderTable({
-    #   dataset()
-    # })
-    
-    # Render a plot based on the updated dataset
-    output$plot_Q1 <- renderPlot({
-      create_ggplot_bar(datasetQ1, "Julia went swimming at the ______")
-    })
-    
-    # Render a plot based on openai's Q1 data
-    output$plot_Q1_openai <- renderPlot({
-      create_ggplot_bar_openai(resp1_freq)
-    })
-    
-    
-    # output$plot <- renderPlot({
-    #   data <- dataset()
-    #   
-    #   # Check if there is data to plot
-    #   if (nrow(data) > 0) {
-    #     ggplot(data, aes(x = UserInput)) +
-    #       geom_bar() +
-    #       theme_minimal() +
-    #       labs(title = "User Input Visualization",
-    #            x = "Input Values",
-    #            y = "Count")
-    #   }
-    # })
-  
-  ##########
-  # Function to get data from Google Sheets and perform data manipulation
-  # df <- reactive({
-  #   # Authenticate using the downloaded JSON file
-  #   gs4_auth(path = "nextwordspredict-1f60d4671052.json")
-  #   sheet_url <- "https://docs.google.com/spreadsheets/d/1B9k5_BNwvTcy4sjWlUMVpVMdvA4RTLefTCbcJN66eFM/edit?resourcekey=&gid=967575587#gid=967575587"
-  #   read_sheet(sheet_url) %>%
-  #     # select every column except for timestamp and user's email address
-  #     select(!c(Timestamp, `Email Address`))
-  # })
-  
-  # # Reactive expression to generate barplot for Question 1
-  # output$histogramPlotQ1 <- renderPlot({
-  #   create_ggplot_bar(df(), "`Julia went swimming at the ______.`", "Julia went swimming at the ______.", color_fill = "#00274D")
-  # })
-  
-  # # Reactive expression to generate barplot for Question 2
-  # output$histogramPlotQ2 <- renderPlot({
-  #   create_ggplot_bar(df(), "`Gabriella went to school to ______.`", "Gabriella went to school to ______.", color_fill = "#FFCB05")
-  # })
-  # 
-  # # Reactive expression to generate barplot for Question 3
-  # output$histogramPlotQ3 <- renderPlot({
-  #   create_ggplot_bar(df(), "`Clarence couldn't believe how ______ the weather was today.`", "Clarence couldn't believe how ______ the weather was today.", color_fill = "#545454")
-  # })
-  # 
-  # # Reactive expression to generate barplot for Question 4
-  # output$histogramPlotQ4 <- renderPlot({
-  #   create_ggplot_bar(df(), "`So far, this course makes me wonder about ______.`", "So far, this course makes me wonder about ______.", color_fill = "#F2E085")
-  # })
-  # 
-  # # Reactive expression to generate barplot for Question 5
-  # output$histogramPlotQ5 <- renderPlot({
-  #   create_ggplot_bar(df(), "`After finishing her homework, Amy decided to ______.`", "After finishing her homework, Amy decided to ______.", color_fill = "#5978A4")
-  # })
-  # 
-  # # Reactive expression to generate barplot for Question 6
-  # output$histogramPlotQ6 <- renderPlot({
-  #   create_ggplot_bar(df(), "`Anthony was excited about the upcoming ______ because he loved spending time with his friends.`", "Anthony was excited about the upcoming ______ because he loved spending time with his friends.", color_fill = "#A3B5A2")
-  # })
-  
-  # Data table output
-  # output$myTable <- renderTable({
-  #   df()
-  # })
+# get frequencies for openAI's Q3
+resp3_freq <- count_word_frequencies(preprocess(openai_dat$resp3))
+
+# get frequencies for openAI's Q4
+resp4_freq <- count_word_frequencies(preprocess(openai_dat$resp4))
+
+# get frequencies for openAI's Q5
+resp5_freq <- count_word_frequencies(preprocess(openai_dat$resp5))
+
+# get frequencies for openAI's Q6
+resp6_freq <- count_word_frequencies(preprocess(openai_dat$resp6))
+
+# Initialize the CSV file if it doesn't exist
+if (!file.exists(responses_dat)) {
+  write.csv(data.frame(
+    Answer1 = character(), 
+    Answer2 = character(),
+    Answer3 = character(),
+    Answer4 = character(),
+    Answer5 = character(),
+    Answer6 = character()
+    ), 
+    responses_dat, row.names = FALSE)
 }
 
-# Run the application 
+# Define the UI
+ui <- fluidPage(
+  titlePanel("Predict the Next Word(s)"),
+  p("This exercise will help you appreciate the complexity and capabilities of AI in natural language processing."),
+  p("First, you'll fill in the blanks for three simple sentences where only one word is missing."),
+  p("Then, you'll complete three more sentences which require you to fill in multiple words."),
+  p("Afterward, you'll see how your peers completed each phrase. You'll use these findings to compare your inputs with different probabilities that could be generated by an AI model and reflect on any differences."),
+  # Part I Questions
+  p(tags$b("Part I: Single-Word Predictions")),
+  p("Please fill in the blanks for the following sentences with a single word that best completes each sentence."),
+  
+  sidebarPanel(
+    width = 12,
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 1
+        textInput("question1", "Question 1: Julia went swimming at the ______.")
+      ),
+      column(
+        width = 12,  # Width of the column for displaying the first graph
+        column(6, plotOutput("histogram1")),  # respQ1 plot
+        column(6, plotOutput("histogram_openai_1"))   # openaiQ1 plot
+      )
+    ),
+    
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 2
+        textInput("question2", "Question 2: Gabriella went to school to ______.")
+      ),
+      column(
+        width = 12,  # Width of the column for displaying the first graph
+        column(6, plotOutput("histogram2")),  # respQ2 plot
+        column(6, plotOutput("histogram_openai_2"))   # openaiQ2 plot
+      )
+    ),
+    
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 2
+        textInput("question3", "Question 3: Clarence couldn't believe how ______ the weather was today.")
+      ),
+      column(
+        width = 12,  # Width of the column for displaying the first graph
+        column(6, plotOutput("histogram3")),  # respQ3 plot
+        column(6, plotOutput("histogram_openai_3"))   # openaiQ3 plot
+      )
+    ),
+    
+    p(tags$b("Part II: Multiple-Word Predictions")),
+    p("Now, complete the following sentences by filling in the blanks with the most appropriate words."),
+    
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 4
+        textInput("question4", "Question 4: After finishing her homework, Amy decided to ______.")
+      ),
+      column(
+        width = 12, 
+        column(6, plotOutput("histogram4")),  # respQ4 plot
+        column(6, plotOutput("histogram_openai_4"))   # openaiQ4 plot
+      )
+    ),
+    
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 5
+        textInput("question5", "Question 5: Anthony was excited about the upcoming ______ because he loved spending time with his friends.")
+      ),
+      column(
+        width = 12, 
+        column(6, plotOutput("histogram5")),  # respQ5 plot
+        column(6, plotOutput("histogram_openai_5"))   # openaiQ5 plot
+      )
+    ),
+    
+    fluidRow(
+      column(
+        width = 12,  # Width of the column for Question 6
+        textInput("question6", "Question 6: So far, this course makes me wonder about ______.")
+      ),
+      column(
+        width = 12, 
+        column(6, plotOutput("histogram6")),  # respQ6 plot
+        column(6, plotOutput("histogram_openai_6"))   # openaiQ6 plot
+      )
+    ),
+    br(),
+    actionButton("submit", "Submit Answers"),
+    br(),
+    textOutput("warning") # To show a warning message if fields are left empty
+  )
+  
+)
+
+# Define the server logic
+server <- function(input, output, session) {
+  
+  # Function to load the responses from the CSV
+  load_responses <- function() {
+    if (file.exists(responses_dat)) {
+      # Ensure columns are read as character type
+      read.csv(responses_dat, stringsAsFactors = FALSE, 
+               colClasses = c("Answer1" = "character", "Answer2" = "character", "Answer3" = "character",  "Answer4" = "character",  "Answer5" = "character",  "Answer6" = "character"))
+    } else {
+      data.frame(
+        Answer1 = character(), 
+        Answer2 = character(), 
+        Answer3 = character(), 
+        Answer4 = character(), 
+        Answer5 = character(),
+        Answer6 = character(), 
+        stringsAsFactors = FALSE)
+    }
+  }
+  
+  # Function to save the responses to the CSV
+  save_responses <- function(data) {
+    write.csv(data, responses_dat, row.names = FALSE)
+  }
+  
+  # Reactive values to hold the response data
+  responses <- reactiveVal(load_responses())
+  
+  # Observe when the submit button is clicked
+  observeEvent(input$submit, {
+    # Check if both questions have a response
+    if (input$question1 == "" | input$question2 == "" | input$question3 == "" | input$question4 == "" | input$question5 == "" | input$question6 == "") {
+      output$warning <- renderText("Please fill out all questions before submitting.")
+    } else {
+      # Clear the warning message if both inputs are filled
+      output$warning <- renderText("")
+      
+      # Add the new answers to the responses and save them to the CSV file
+      new_row <- data.frame(
+        Answer1 = input$question1, 
+        Answer2 = input$question2,
+        Answer3 = input$question3, 
+        Answer4 = input$question4, 
+        Answer5 = input$question5, 
+        Answer6 = input$question6, 
+        stringsAsFactors = FALSE)
+      updated_responses <- bind_rows(responses(), new_row)
+      
+      # Update reactive value and save to CSV
+      responses(updated_responses)
+      save_responses(updated_responses)
+    }
+  })
+  
+  # histogram for Q1
+  output$histogram1 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer1", "Answers to Question 1", "Frequency", "Histogram of Answers to Question 1")
+  })
+  
+  # histogram for openai Q1
+  output$histogram_openai_1 <- renderPlot({
+    create_ggplot_bar_openai(resp1_freq)
+  })
+  
+  # histogram for Q2
+  output$histogram2 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer2", "Answers to Question 2", "Frequency", "Histogram of Answers to Question 2")
+  })
+  
+  # histogram for openai Q2
+  output$histogram_openai_2 <- renderPlot({
+    create_ggplot_bar_openai(resp2_freq)
+  })
+  
+  # histogram for Q3
+  output$histogram3 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer3", "Answers to Question 3", "Frequency", "Histogram of Answers to Question 3")
+  })
+  
+  # histogram for openai Q3
+  output$histogram_openai_3 <- renderPlot({
+    create_ggplot_bar_openai(resp3_freq)
+  })
+  
+  # histogram for Q4
+  output$histogram4 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer4", "Answers to Question 4", "Frequency", "Histogram of Answers to Question 4")
+  })
+  
+  # histogram for openai Q4
+  output$histogram_openai_4 <- renderPlot({
+    create_ggplot_bar_openai(resp4_freq)
+  })
+  
+  # histogram for Q5
+  output$histogram5 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer5", "Answers to Question 5", "Frequency", "Histogram of Answers to Question 5")
+  })
+  
+  # histogram for openai Q5
+  output$histogram_openai_5 <- renderPlot({
+    create_ggplot_bar_openai(resp5_freq)
+  })
+  
+  # histogram for Q6
+  output$histogram6 <- renderPlot({
+    response_data <- responses()
+    create_histogram(response_data, "Answer6", "Answers to Question 6", "Frequency", "Histogram of Answers to Question 6")
+  })
+  
+  # histogram for openai Q6
+  output$histogram_openai_6 <- renderPlot({
+    create_ggplot_bar_openai(resp6_freq)
+  })
+}
+
+# Run the app
 shinyApp(ui = ui, server = server)

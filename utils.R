@@ -1,4 +1,18 @@
-cat("Loading helper functions from utils.R...\n")
+# Helper function to create histograms
+create_histogram <- function(data, column, x_label, y_label, title) {
+  # Check if there is data to plot
+  if (nrow(data) > 0) {
+    ggplot(data, aes_string(x = column)) +
+      geom_bar(stat = "count") +  # Default stat is "count", but making it explicit
+      theme_minimal() +
+      labs(title = title,
+           x = x_label,
+           y = y_label) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for readability
+      scale_x_discrete(limits = rev(levels(factor(data[[column]]))))  # Reorder based on factor levels in reverse order
+  }
+}
+
 
 # Function to preprocess text data by removing stopwords and extra spaces
 preprocess <- function(x){
@@ -15,48 +29,20 @@ count_word_frequencies <- function(column) {
     unlist() %>%                     # Convert the list of words to a vector
     table() %>%                      # Count the occurrences of each word
     as.data.frame() %>%              # Convert the table of counts to a dataframe
+    mutate(Freq = Freq / sum(Freq)) %>% # Calculate frequencies by dividing by the total count
     arrange(desc(Freq))              # Sort the dataframe by frequency in descending order
-}
-
-# Helper function to return new data to append based on input
-append_input_to_dataset <- function(input, text_input_id, dataset) {
-  # Get current dataset
-  current_data <- dataset()
-  
-  # Append the new input
-  new_data <- rbind(current_data, data.frame(UserInput = input[[text_input_id]], stringsAsFactors = FALSE))
-  
-  # Return updated dataset
-  return(new_data)
-}
-
-# Helper function to generate a bar plot for each question
-create_ggplot_bar <- function(data, title = "Question") {
-  data <- data()
-  
-  # Check if there is data to plot
-  if (nrow(data) > 0) {
-    ggplot(data, aes(x = UserInput)) +
-      geom_bar() +
-      theme_minimal() +
-      labs(title = title,
-           x = "Input Values",
-           y = "Count")
-  }
 }
 
 # Helper function to create a bar plot with the given dataset
 create_ggplot_bar_openai <- function(data) {
   # Check if there is data to plot
   if (nrow(data) > 0) {
-    ggplot(data, aes(x = ., y = Freq)) +
-      geom_bar(stat = "identity") +
-      theme_minimal() +
-      labs(title = "Histogram of Frequencies",
-           x = "Category",
-           y = "Frequency")
+    ggplot(data, aes(x = reorder(., -Freq), y = Freq)) +  # Reorder based on Freq in descending order
+      geom_bar(stat = "identity") + 
+      theme_minimal() + 
+      labs(title = "Histogram of OpenAI Frequencies",
+           x = "OpenAI Words",
+           y = "Frequency") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
   }
 }
-
-
-
