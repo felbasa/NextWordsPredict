@@ -14,22 +14,22 @@ responses_dat <- "responses.csv"
 openai_dat <- read_csv("openai_dat.csv")
 
 # get frequencies for openAI's Q1
-resp1_freq <- count_word_frequencies(preprocess(openai_dat$resp1))
+resp1_freq <- preprocess(openai_dat$resp1)
 
 # get frequencies for openAI's Q2
-resp2_freq <- count_word_frequencies(preprocess(openai_dat$resp2))
+resp2_freq <- preprocess(openai_dat$resp2)
 
 # get frequencies for openAI's Q3
-resp3_freq <- count_word_frequencies(preprocess(openai_dat$resp3))
+resp3_freq <- preprocess(openai_dat$resp3)
 
 # get frequencies for openAI's Q4
-resp4_freq <- count_word_frequencies(preprocess(openai_dat$resp4))
+resp4_freq <- preprocess(openai_dat$resp4)
 
 # get frequencies for openAI's Q5
-resp5_freq <- count_word_frequencies(preprocess(openai_dat$resp5))
+resp5_freq <- preprocess(openai_dat$resp5)
 
 # get frequencies for openAI's Q6
-resp6_freq <- count_word_frequencies(preprocess(openai_dat$resp6))
+resp6_freq <- preprocess(openai_dat$resp6)
 
 # Initialize the CSV file if it doesn't exist
 if (!file.exists(responses_dat)) {
@@ -170,6 +170,10 @@ server <- function(input, output, session) {
   
   # Observe when the submit button is clicked
   observeEvent(input$submit, {
+    
+    # Capture the IP address
+    ip_address <- session$clientData$url_hostname
+    
     # Check if both questions have a response
     if (input$question1 == "" | input$question2 == "" | input$question3 == "" | input$question4 == "" | input$question5 == "" | input$question6 == "") {
       output$warning <- renderText("Please fill out all questions before submitting.")
@@ -191,73 +195,92 @@ server <- function(input, output, session) {
       # Update reactive value and save to CSV
       responses(updated_responses)
       save_responses(updated_responses)
+      
+      updateTextInput(session, "question1", value = "")
+      updateTextInput(session, "question2", value = "")
+      updateTextInput(session, "question3", value = "")
+      updateTextInput(session, "question4", value = "")
+      updateTextInput(session, "question5", value = "")
+      updateTextInput(session, "question6", value = "")
     }
   })
   
   # histogram for Q1
   output$histogram1 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer1", "Answers to Question 1", "Frequency", "Histogram of Answers to Question 1")
+    #create_histogram(response_data, "Answer1", "Answers to Question 1", "Frequency", "Histogram of Answers to Question 1")
+    histplot(response_data$Answer1, newword= input$question1 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
   })
   
   # histogram for openai Q1
   output$histogram_openai_1 <- renderPlot({
-    create_ggplot_bar_openai(resp1_freq)
+    # create_ggplot_bar_openai(resp1_freq)
+    histplot(resp1_freq$Value, newword= input$question1 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
   })
   
   # histogram for Q2
   output$histogram2 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer2", "Answers to Question 2", "Frequency", "Histogram of Answers to Question 2")
+    # create_histogram(response_data, "Answer2", "Answers to Question 2", "Frequency", "Histogram of Answers to Question 2")
+    histplot(response_data$Answer2, newword= input$question2 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
   })
   
   # histogram for openai Q2
   output$histogram_openai_2 <- renderPlot({
-    create_ggplot_bar_openai(resp2_freq)
+    # create_ggplot_bar_openai(resp2_freq)
+    histplot(resp2_freq$Value, newword= input$question2 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
   })
   
   # histogram for Q3
   output$histogram3 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer3", "Answers to Question 3", "Frequency", "Histogram of Answers to Question 3")
+    histplot(response_data$Answer3, newword= input$question3 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
+    # create_histogram(response_data, "Answer3", "Answers to Question 3", "Frequency", "Histogram of Answers to Question 3")
   })
   
   # histogram for openai Q3
   output$histogram_openai_3 <- renderPlot({
-    create_ggplot_bar_openai(resp3_freq)
+    histplot(resp3_freq$Value, newword= input$question3 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
+    # create_ggplot_bar_openai(resp3_freq)
   })
   
   # histogram for Q4
   output$histogram4 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer4", "Answers to Question 4", "Frequency", "Histogram of Answers to Question 4")
+    histplot(response_data$Answer4, newword= input$question4 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
+    # create_histogram(response_data, "Answer4", "Answers to Question 4", "Frequency", "Histogram of Answers to Question 4")
   })
   
   # histogram for openai Q4
   output$histogram_openai_4 <- renderPlot({
-    create_ggplot_bar_openai(resp4_freq)
+    histplot(resp4_freq$Value, newword= input$question4 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
+    # create_ggplot_bar_openai(resp4_freq)
   })
   
   # histogram for Q5
   output$histogram5 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer5", "Answers to Question 5", "Frequency", "Histogram of Answers to Question 5")
+    histplot(response_data$Answer5, newword= input$question5 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
+    # create_histogram(response_data, "Answer5", "Answers to Question 5", "Frequency", "Histogram of Answers to Question 5")
   })
   
   # histogram for openai Q5
   output$histogram_openai_5 <- renderPlot({
-    create_ggplot_bar_openai(resp5_freq)
+    histplot(resp5_freq$Value, newword= input$question5 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
+    # create_ggplot_bar_openai(resp5_freq)
   })
   
   # histogram for Q6
   output$histogram6 <- renderPlot({
     response_data <- responses()
-    create_histogram(response_data, "Answer6", "Answers to Question 6", "Frequency", "Histogram of Answers to Question 6")
+    histplot(response_data$Answer6, newword= input$question6 , ip="12123123", main="Human Distribution", charmax=30, maxbars=4)
+    # create_histogram(response_data, "Answer6", "Answers to Question 6", "Frequency", "Histogram of Answers to Question 6")
   })
   
   # histogram for openai Q6
   output$histogram_openai_6 <- renderPlot({
-    create_ggplot_bar_openai(resp6_freq)
+    histplot(resp6_freq$Value, newword= input$question6 , ip="12123123", main="OpenAI Distribution", charmax=30, maxbars=4)
+    # create_ggplot_bar_openai(resp6_freq)
   })
 }
 
