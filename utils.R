@@ -13,7 +13,15 @@ create_histogram <- function(data, column, x_label, y_label, title) {
   }
 }
 
-df <- preprocess(openai_dat$resp4)
+# Function to preprocess text data by removing stopwords and extra spaces
+preprocess <- function(x){
+  require(quanteda) # Load the 'quanteda' package for stopwords
+  data.frame(Value = gsub("  ", " ", # Replace double spaces with a single space
+                          gsub("  ", " ", # Ensure extra spaces are removed
+                               gsub(paste("\\b", stopwords("en"), "\\b", sep="", collapse="|"), "", x)))) # Remove stopwords from the text
+}
+
+# df <- preprocess(openai_dat$resp4)
 
 # words = vector of words (from csv or openAI list)
 # newword = Novel word added by user
@@ -125,13 +133,7 @@ histplot <- function(words, newword = NULL, ip = NULL, main = "Plot", charmax = 
 # histplot(openai_dat$resp4, newword="tea", ip="12123123", main="Plot", charmax=30, maxbars=4)
 
 
-# Function to preprocess text data by removing stopwords and extra spaces
-preprocess <- function(x){
-  require(quanteda) # Load the 'quanteda' package for stopwords
-  data.frame(Value = gsub("  ", " ", # Replace double spaces with a single space
-                          gsub("  ", " ", # Ensure extra spaces are removed
-                               gsub(paste("\\b", stopwords("en"), "\\b", sep="", collapse="|"), "", x)))) # Remove stopwords from the text
-}
+
 
 # Function to count word frequencies in a text column
 count_word_frequencies <- function(column) {
